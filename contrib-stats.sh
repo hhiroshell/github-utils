@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 
 function usage {
-    cat <<EOM
+    cat >&2<<EOM
 Usage: $(basename "$0") [OPTION]...
     -r VALUE    GitHub repository
     -u VALUE    GitHub account
     -h          Display help
 EOM
+}
+
+function log() {
+    echo "$*" >&2
 }
 
 while getopts ":r:u:h" optKey; do
@@ -32,11 +36,11 @@ fi
 echo "Repository: ${repository}, User: ${user}"
 
 if ! gh auth status > /dev/null 2>&1; then
-    echo "GitHub CLI is not authenticated. Please run 'gh auth login' to authenticate."
+    log "GitHub CLI is not authenticated. Please run 'gh auth login' to authenticate."
     exit 2
 fi
 
-echo "Counting commits..." >&2
+log "Counting commits..."
 for n in $(
     gh api -X GET "repos/${repository}/commits" \
         --jq "[.[] | select(.author.login == \"${user}\")] | length" \
@@ -45,7 +49,7 @@ for n in $(
     commits_count=$((commits_count + n))
 done
 
-echo "Counting pull requests..." >&2
+log "Counting pull requests..." >&2
 for n in $(
     gh api -X GET "repos/${repository}/pulls?state=all" \
         --jq "[.[] | select(.user.login == \"${user}\")] | length" \
@@ -54,7 +58,7 @@ for n in $(
     pulls_count=$((pulls_count + n))
 done
 
-echo "Counting issues..." >&2
+log "Counting issues..." >&2
 for n in $(
     gh api -X GET "repos/${repository}/issues?state=all" \
         --jq "[.[] | select(.user.login == \"${user}\") | select(.pull_request | not)] | length" \
