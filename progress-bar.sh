@@ -12,5 +12,6 @@ function progress_bar() {
 
 function finish_progress_bar() {
     progress_bar "100" "100"
-    echo "" >&2
+    sleep 0.5
+    echo -ne '\r\033[K'
 }
