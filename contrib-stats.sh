@@ -67,7 +67,8 @@ for n in $(
 done
 
 log "Counting reviews..." >&2
-latest=0
+latest_pr=0
+reviews_count=0
 for pulls in $(
     gh api -X GET "repos/${repository}/pulls?state=all" \
         --jq "[.[] | select(.user.login == \"${user}\" | not) | .number]" \
@@ -80,10 +81,10 @@ for pulls in $(
             reviews_count=$((reviews_count + 1))
         fi
 
-        if [ "${latest}" -eq 0 ]; then
-            latest="${p}"
+        if [ "${latest_pr}" -eq 0 ]; then
+            latest_pr="${p}"
         fi
-        progress_bar "$((latest - p))" "${latest}"
+        progress_bar "$((latest_pr - p))" "${latest_pr}"
     done
 done
 finish_progress_bar
